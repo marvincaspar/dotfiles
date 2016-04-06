@@ -43,4 +43,7 @@
 [pull]
   rebase = true
 [diff]
-  tool = meld
+  tool = meld 
+[merge]
+  ff = false
+
