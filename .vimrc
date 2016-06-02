@@ -46,9 +46,9 @@ set smarttab
 set shiftwidth=4
 set tabstop=4
 
-" Linebreak on 120 characters
+" Linebreak on 72 characters
 set lbr
-set tw=120
+set tw=72
 
 set ai "Auto indent
 set si "Smart indent
