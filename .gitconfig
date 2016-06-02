@@ -11,21 +11,25 @@
   br = branch
   co = checkout
   df = difftool
+  mg = mergetool
   rb = rebase
+  rbd = rebase -i develop
   po = push origin
   pot = push origin --tags
+
   lg = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d    %C(reset)' --all
   lga = log --graph --oneline --all --decorate
+
   append = commit --amend --no-edit
   undo = reset --hard HEAD
   undoc = reset --hard HEAD~1
-  
+
   # git flow
   fs = flow feature start
   fp = flow feature push
   ff = flow feature finish -rS
   rs = flow release start
-  rf = flow release finish
+  rf = release finish
 [color]
   ui = auto
 [color "branch"]
@@ -46,9 +50,8 @@
 [pull]
   rebase = true
 [diff]
-  tool = meld 
-[merge]
-  ff = false
+  tool = meld
 [commit]
-	template = ~/.gitmessage
+  template = /home/arvato/.gitmessage
+
 
