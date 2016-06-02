@@ -29,7 +29,7 @@
   fp = flow feature push
   ff = flow feature finish -rS
   rs = flow release start
-  rf = release finish
+  rf = flow release finish
 [color]
   ui = auto
 [color "branch"]
