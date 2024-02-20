@@ -61,7 +61,7 @@ ZSH_THEME=""
 # or set a custom format using the strftime function format specifications,
 # see 'man strftime' for details.
 HIST_STAMPS="yyyy-mm-dd"
-HISTSIZE=1000000000
+HISTSIZE=1000000
 SAVEHIST=$HISTSIZE
 ## History command configuration
 setopt extended_history       # record timestamp of command in HISTFILE
@@ -113,7 +113,7 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-
+alias cat="bat"
 eval $(thefuck --alias)
 
 # pure promt https://github.com/sindresorhus/pure
@@ -128,4 +128,5 @@ function gcb() {
 
   git branch --merged | egrep -v "(^\*|main|develop)" | xargs git branch -d
 }
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

@@ -2,6 +2,7 @@ tap 'homebrew/cask'
 
 brew 'awscli'
 brew 'azure-cli'
+brew 'bat'
 brew 'ctop'
 brew 'curl'
 brew 'dockutil'
