@@ -1,3 +1,5 @@
+# zmodload zsh/zprof
+
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$(go env GOPATH)/bin:$HOME/dotfiles/scripts:$PATH
 
@@ -82,9 +84,31 @@ setopt share_history          # share command history data
 plugins=(
   composer
   git
-  zsh-autosuggestions
-  zsh-syntax-highlighting
+  # zsh-autosuggestions
+  # zsh-syntax-highlighting
 )
+
+# source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+
+# https://gist.github.com/ctechols/ca1035271ad134841284#gistcomment-2308206
+
+# On slow systems, checking the cached .zcompdump file to see if it must be 
+# regenerated adds a noticable delay to zsh startup.  This little hack restricts 
+# it to once a day.  It should be pasted into your own completion file.
+#
+# The globbing is a little complicated here:
+# - '#q' is an explicit glob qualifier that makes globbing work within zsh's [[ ]] construct.
+# - 'N' makes the glob pattern evaluate to nothing when it doesn't match (rather than throw a globbing error)
+# - '.' matches "regular files"
+# - 'mh+24' matches files (or directories or whatever) that are older than 24 hours.
+autoload -Uz compinit 
+if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
+	compinit;
+else
+	compinit -C;
+fi;
 
 source $ZSH/oh-my-zsh.sh
 
@@ -114,7 +138,7 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias cat="bat"
-eval $(thefuck --alias)
+
 
 # pure promt https://github.com/sindresorhus/pure
 fpath+=("$(brew --prefix)/share/zsh/site-functions")
@@ -123,10 +147,21 @@ PURE_CMD_MAX_EXEC_TIME=1
 prompt pure
 
 # git clean up merged branches
-function gcb() {
+function gcmb() {
   git fetch --prune origin
 
-  git branch --merged | egrep -v "(^\*|main|develop)" | xargs git branch -d
+  git branch --merged | egrep -v "(^\*|main|master|develop)" | xargs git branch --delete
 }
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+bindkey "ç" fzf-cd-widget
+# search filed with fd -> automatically excludes files from .gitignore
+# export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git --ignore-file ~/.fdignore'
+alias fzfp="fzf --preview 'bat --color=always {}' --preview-window '~3'"
+
+
+eval $(thefuck --alias)
+eval "$(zoxide init zsh --cmd cd)"
+
+
+# zprof

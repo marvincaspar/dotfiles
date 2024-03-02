@@ -23,8 +23,14 @@ cd dotfiles
 Install brew packages
 
 ```
-brew bundle --file=scripts/Brewfile
-brew cask bundle --file=scripts/Brewfile.cask
+brew bundle --file=brew/Brewfile
+brew cask bundle --file=brew/Brewfile.cask
+```
+
+Install or configure tools
+
+```
+./scripts/tools.sh
 ```
 
 then use GNU stow to create symlinks

@@ -4,4 +4,7 @@
 
 ^/README.*
 
+brew
 scripts
+
+.DS_Store

@@ -17,6 +17,7 @@
   mg = mergetool
   rb = rebase
   rbd = rebase -i develop
+  pf = push --force-with-lease
   po = push origin
   pot = push origin --tags
   por = push origin master develop --tags
@@ -59,3 +60,6 @@
   helper = osxkeychain
 [init]
   defaultBranch = main
+[maintenance]
+	repo = /Users/marvincaspar/dotfiles
+	repo = /Users/marvincaspar/dev/arvato/magento2/shops/allianz/magento2-allianz
