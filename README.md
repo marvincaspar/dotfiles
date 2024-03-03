@@ -7,6 +7,7 @@ This directory contains the dotfiles for my system
 Ensure you have the following installed on your system
 
 ```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 brew install git
 brew install stow # https://www.gnu.org/software/stow/manual/stow.html
 ```

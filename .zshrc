@@ -1,5 +1,13 @@
 # zmodload zsh/zprof
 
+
+source_if_exists () {
+    if test -r "$1"; then
+        source "$1"
+    fi
+}
+
+
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$(go env GOPATH)/bin:$HOME/dotfiles/scripts:$PATH
 
@@ -112,6 +120,12 @@ fi;
 
 source $ZSH/oh-my-zsh.sh
 
+eval "$(starship init zsh)"
+export STARSHIP_CONFIG=~/.config/starship/starship.toml
+
+source_if_exists ~/.config/zsh/fzf.zsh
+
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
@@ -141,10 +155,10 @@ alias cat="bat"
 
 
 # pure promt https://github.com/sindresorhus/pure
-fpath+=("$(brew --prefix)/share/zsh/site-functions")
-autoload -U promptinit; promptinit
-PURE_CMD_MAX_EXEC_TIME=1
-prompt pure
+# fpath+=("$(brew --prefix)/share/zsh/site-functions")
+# autoload -U promptinit; promptinit
+# PURE_CMD_MAX_EXEC_TIME=1
+# prompt pure
 
 # git clean up merged branches
 function gcmb() {
@@ -153,7 +167,7 @@ function gcmb() {
   git branch --merged | egrep -v "(^\*|main|master|develop)" | xargs git branch --delete
 }
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 bindkey "ç" fzf-cd-widget
 # search filed with fd -> automatically excludes files from .gitignore
 # export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git --ignore-file ~/.fdignore'
