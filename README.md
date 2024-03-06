@@ -39,3 +39,7 @@ then use GNU stow to create symlinks
 ```
 stow .
 ```
+
+## Color scheme
+
+I try to use the same color scheme as tools. Currently I prefer [catppuccin/mocha](https://github.com/catppuccin/).
