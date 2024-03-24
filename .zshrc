@@ -56,6 +56,8 @@ alias la="eza --long --all --group"
 alias man="tldr"
 alias c="clear"
 
+# SSH issues with kitten https://sw.kovidgoyal.net/kitty/faq/#i-get-errors-about-the-terminal-being-unknown-or-opening-the-terminal-failing-or-functional-keys-like-arrow-keys-don-t-work
+alias s="kitten ssh"
 
 eval $(thefuck --alias)
 eval "$(zoxide init zsh --cmd cd)"
