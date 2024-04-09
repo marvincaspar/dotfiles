@@ -61,6 +61,7 @@ alias s="kitten ssh"
 
 eval $(thefuck --alias)
 eval "$(zoxide init zsh --cmd cd)"
+eval "$(atuin init zsh)"
 
 
 export PATH=$HOME/bin:/usr/local/bin:$(go env GOPATH)/bin:$HOME/dotfiles/scripts:$PATH

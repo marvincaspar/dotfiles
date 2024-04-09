@@ -1,5 +1,6 @@
 tap 'homebrew/cask'
 
+brew 'atuin'
 brew 'awscli'
 brew 'azure-cli'
 brew 'bat'
