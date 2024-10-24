@@ -1,0 +1,9 @@
+# Add in zsh plugins
+Aloxaf/fzf-tab
+zsh-users/zsh-syntax-highlighting kind:defer
+zsh-users/zsh-completions kind:defer
+zsh-users/zsh-autosuggestions kind:defer
+
+# Add in snippets
+ohmyzsh/ohmyzsh path:lib
+ohmyzsh/ohmyzsh path:plugins/git

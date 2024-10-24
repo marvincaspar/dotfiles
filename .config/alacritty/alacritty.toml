@@ -13,12 +13,12 @@ dynamic_padding = true
 opacity = 0.9
 
 [scrolling]
-history = 100000
+history = 5000
 multiplier = 3
 
 [font]
 size = 14
-normal = { family = "Hack Nerd Font Mono", style = "Regular" }
+normal = { family = "MesloLGL Nerd Font Mono", style = "Regular" }
 
 [keyboard]
 bindings = [
