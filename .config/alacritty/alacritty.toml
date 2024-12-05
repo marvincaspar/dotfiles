@@ -1,9 +1,6 @@
-import = [
-    "~/.config/alacritty/themes/catppuccin-mocha.toml"
-]
 
 
-[shell]
+[terminal.shell]
 program = "/bin/zsh"
 args = ["-l"]
 
@@ -24,3 +21,10 @@ normal = { family = "MesloLGL Nerd Font Mono", style = "Regular" }
 bindings = [
 { key = "Return", mods = "Command", action = "CreateNewWindow" },
 ]
+
+[general]
+import = [
+    "~/.config/alacritty/themes/catppuccin-mocha.toml"
+]
+
+[terminal]

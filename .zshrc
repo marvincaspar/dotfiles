@@ -28,10 +28,6 @@ autoload -Uz compinit && compinit
 source "${ZDOTDIR}/antidote.zsh"
 antidote load $HOME/.config/antidote/.zsh_plugins.txt
 
-# if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
-#   eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/omp.toml)"
-# fi
-
 
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 eval "$(starship init zsh)"
@@ -43,25 +39,10 @@ bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 bindkey '^[w' kill-region
 
-
-
-# Use if not using atuin
-# # History
-# HISTSIZE=5000
-# HISTFILE=~/.zsh_history
-# SAVEHIST=$HISTSIZE
-# HISTDUP=erase
-# setopt appendhistory
-# setopt sharehistory
-# setopt hist_ignore_space
-# setopt hist_ignore_all_dups
-# setopt hist_save_no_dups
-# setopt hist_ignore_dups
-# setopt hist_find_no_dups
-
 # Shell integrations
 eval "$(fzf --zsh)"
-eval "$(thefuck --alias)"
+# eval "$(thefuck --alias)" # currently removed because it's slow while creating a new shell
+alias fuck='if ! declare -f fuck &>/dev/null; then eval -- "$(thefuck -a)"; fi && fuck'
 eval "$(zoxide init zsh --cmd cd)"
 eval "$(atuin init zsh)"
 
