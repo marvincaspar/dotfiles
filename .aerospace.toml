@@ -12,7 +12,7 @@ after-login-command = []
 after-startup-command = []
 
 # Start AeroSpace at login
-start-at-login = false
+start-at-login = true
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
 enable-normalization-flatten-containers = true
@@ -188,13 +188,13 @@ run = 'layout floating'
 
 # Assign apps to particular workspaces
 
-[[on-window-detected]]
-if.app-id = 'com.microsoft.teams2'
-run = 'move-node-to-workspace C'
+# [[on-window-detected]]
+# if.app-id = 'com.microsoft.teams2'
+# run = 'move-node-to-workspace C'
 
-[[on-window-detected]]
-if.app-id = 'com.apple.MobileSMS'
-run = ['layout floating']
+# [[on-window-detected]]
+# if.app-id = 'com.apple.MobileSMS'
+# run = ['layout floating']
 
 # [[on-window-detected]]
 # if.app-id = 'com.microsoft.Outlook'
