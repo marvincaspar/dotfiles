@@ -3,6 +3,7 @@ Aloxaf/fzf-tab
 zsh-users/zsh-syntax-highlighting kind:defer
 zsh-users/zsh-completions kind:defer
 zsh-users/zsh-autosuggestions kind:defer
+romkatv/zsh-defer
 
 # Add in snippets
 ohmyzsh/ohmyzsh path:lib

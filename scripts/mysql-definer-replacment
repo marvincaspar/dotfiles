@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+
+set -o errexit
+set -o nounset
+set -o pipefail
+if [[ "${TRACE-0}" == "1" ]]; then
+    set -o xtrace
+fi
+
+if [[ "${1-}" =~ ^-*h(elp)?$ ]]; then
+    echo 'Usage: mysql-definer-replacment db-dump-file.sql
+
+Replace the DEFINER clause in a MySQL dump file with the current user.
+
+'
+    exit
+fi
+
+main() {
+    if [ "$#" -ne 1 ]; then
+        echo "Please provide a filename and a shop directory"
+        exit 1
+    fi
+
+    local file="$1"
+    local is_gzipped=0
+
+    cd "$(pwd)"
+
+    if file "$file" | grep -q "gzip compressed data"; then
+        echo "Unzipping $file"
+        gunzip "$file"
+        file="${file%.gz}"
+        is_gzipped=1
+    fi
+
+    echo "Replacing DEFINER in $file"
+    # sed -i '' 's/DEFINER=[^*]* /DEFINER=CURRENT_USER /g' "$file"
+    sed -i '' -E 's/DEFINER=`[^`]+`@`[^`]+`//g' "$file"
+
+    if [ "$is_gzipped" -eq 1 ]; then
+        echo "Rezipping $file"
+        gzip "$file"
+    fi
+}
+
+main "$@"
