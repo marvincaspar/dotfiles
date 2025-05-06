@@ -31,7 +31,8 @@ brew cask bundle --file=brew/Brewfile.cask
 Install or configure tools
 
 ```
-./scripts/tools.sh
+./install-tools.sh
+./symlink-scripts.sh
 ```
 
 then use GNU stow to create symlinks
