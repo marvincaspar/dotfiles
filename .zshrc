@@ -66,7 +66,7 @@ bindkey '^[w' kill-region
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 alias fuck='if ! declare -f fuck &>/dev/null; then eval -- "$(thefuck -a)"; fi && fuck'
 
-zsh-defer eval "$(starship init zsh)"
+eval "$(starship init zsh)"
 zsh-defer eval "$(fzf --zsh)"
 zsh-defer eval "$(zoxide init zsh --cmd cd)"
 zsh-defer eval "$(atuin init zsh)"
