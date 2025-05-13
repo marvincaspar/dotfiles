@@ -19,6 +19,8 @@ First, check out the dotfiles repo in your $HOME directory using git
 ```
 git clone git@github.com/marvincaspar/dotfiles.git
 cd dotfiles
+git submodule init
+git submodule update --recursive --remote
 ```
 
 Install brew packages
