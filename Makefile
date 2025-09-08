@@ -29,5 +29,6 @@ install: ## Install dotfiles using GNU Stow
 	brew bundle --file=brew/Brewfile
 	brew cask bundle --file=brew/Brewfile.cask
 	./symlink-scripts.sh
-	./install-tools.sh
+	./install-tools.sh	
+	osascript -e 'tell application "System Events" to set picture of every desktop to POSIX file "/Users/'$USER'/dotfiles/wallpaper/20250908.jpg"'
 	@echo "Dotfiles installed successfully."
