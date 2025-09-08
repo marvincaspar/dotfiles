@@ -79,7 +79,7 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
 export GOPATH="${GOPATH:-$HOME/dev/go}"
-export PATH="$HOME/bin:/usr/local/bin:$GOPATH/bin:$HOME/dotfiles/scripts:$PATH"
+export PATH="$HOME/bin:/usr/local/bin:$GOPATH/bin:$HOME/.composer/vendor/bin/:$HOME/dotfiles/scripts:$PATH"
 
 
 # git clean up merged branches
@@ -95,6 +95,7 @@ gif() {
     ffmpeg -y -i $1 -v quiet -pix_fmt rgb8 -r 10 $output_file && gifsicle -O3 $output_file -o $output_file
 }
 
+alias reload="source ~/.zshrc"
 alias f="fuck"
 alias cat="bat"
 alias catp="bat --style=plain"
