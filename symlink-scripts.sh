@@ -21,4 +21,6 @@ for script in "$SCRIPT_DIR"/*; do
     fi
 done
 
+ln -sf ~/dotfiles/wallpapers/com.user.rotatewallpaper.plist ~/Library/LaunchAgents/com.user.rotatewallpaper.plist
+
 echo "All scripts have been symlinked."
