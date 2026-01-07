@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Get the commit message file
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+# Skip for merge commits and amend
+if [ "$COMMIT_SOURCE" = "merge" ]; then
+  exit 0
+fi
+
+# Get current branch name
+BRANCH_NAME=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+# Extract ticket ID from branch name (e.g., feature/ABC-123-description, bugfix/XYZ-456-fix or hotfix/DEF-789-urgent)
+TICKET_ID=$(echo "$BRANCH_NAME" | sed -nE 's/^(feature|(bug|hot)fix)\/([A-Z]{2,5}-[0-9]{1,5})-.*/\3/p')
+
+# If ticket ID found and not already in commit message, prepend it
+if [ -n "$TICKET_ID" ]; then
+  COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+  
+  # Check if ticket ID is already in the commit message
+  if ! echo "$COMMIT_MSG" | grep -qE "^$TICKET_ID"; then
+    # Prepend ticket ID to commit message
+    echo "$TICKET_ID: $COMMIT_MSG" > "$COMMIT_MSG_FILE"
+  fi
+fi

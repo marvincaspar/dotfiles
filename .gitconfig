@@ -6,6 +6,7 @@
   autocrlf = input
   editor = vim
   excludesfile = ~/.gitignore_global
+  hooksPath = ~/.git-hooks
 [alias]
   a = add
   aa = add .
@@ -14,6 +15,7 @@
   cim = commit -m
   br = branch
   co = checkout
+  sw = switch
   df = difftool
   mg = mergetool
   rb = rebase
@@ -56,11 +58,15 @@
   autoSetupRemote = true
 [pull]
   rebase = true
-[url "git@ssh.dev.azure.com:v3/"]
-  insteadOf = https://dev.azure.com/
+# [url "git@ssh.dev.azure.com:v3/"]
+#   insteadOf = https://dev.azure.com/
 [credential]
   helper = osxkeychain
-	helper = /usr/local/share/gcm-core/git-credential-manager
+  credentialStore = cache
+  helper = /usr/local/bin/git-credential-manager
+  azreposCredentialType = oauth
+[credential "https://dev.azure.com"]
+  useHttpPath = true
 [init]
   defaultBranch = main
 [commit]
@@ -74,5 +80,4 @@
 [rerere]
 	enabled = 1
 	autoupdate = 1
-[credential "https://dev.azure.com"]
-	useHttpPath = true
+
