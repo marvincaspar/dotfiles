@@ -12,29 +12,24 @@ if [[ -f "/opt/homebrew/bin/brew" && $- == *l* ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-# Set the directory we want to store zinit and plugins
+# Set the directory we want to store antidote and plugins
 ZDOTDIR="${HOME}/.antidote"
 
-# Download Zinit, if it's not there yet
+# Download antidote, if it's not there yet
 if [ ! -d "$ZDOTDIR" ]; then
    git clone --depth=1 https://github.com/mattmc3/antidote.git ${ZDOTDIR}
 fi
 
-# Speed up compinit by caching
+# Initialize compinit before loading plugins (needed for compdef)
 autoload -Uz compinit
 zcompdump="$HOME/.zcompdump"
 # Only recompile if needed
-if [[ ! -s $ZSH_COMPDUMP.zwc || $ZSH_COMPDUMP -nt $ZSH_COMPDUMP.zwc ]]; then
-  compinit -C -d "$ZSH_COMPDUMP"
-  zcompile ~/.zcompdump
+if [[ ! -s ${zcompdump}.zwc || ${zcompdump} -nt ${zcompdump}.zwc ]]; then
+  compinit -d "${zcompdump}"
+  zcompile "${zcompdump}"
 else
-  source "$ZSH_COMPDUMP.zwc"
+  compinit -C -d "${zcompdump}"
 fi
-
-
-# Source/Load antidote
-source "${ZDOTDIR}/antidote.zsh"
-
 
 # Set the root name of the plugins files (.txt and .zsh) antidote will use.
 zsh_plugins=$HOME/.config/antidote/.zsh_plugins
@@ -43,7 +38,7 @@ zsh_plugins=$HOME/.config/antidote/.zsh_plugins
 [[ -f ${zsh_plugins}.txt ]] || touch ${zsh_plugins}.txt
 
 # Lazy-load antidote from its functions directory.
-fpath=(/path/to/antidote/functions $fpath)
+fpath=(${ZDOTDIR}/functions $fpath)
 autoload -Uz antidote
 
 # Generate a new static file whenever .zsh_plugins.txt is updated.
@@ -53,8 +48,6 @@ fi
 
 # Source your static plugins file.
 source ${zsh_plugins}.zsh
-
-
 
 # Keybindings
 bindkey -e
@@ -120,3 +113,11 @@ source_if_exists ~/.config/zsh/work.zsh
 # End of Docker CLI completions
 
 # zprof
+
+# pnpm
+export PNPM_HOME="/Users/marvincaspar/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
