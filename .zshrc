@@ -105,6 +105,7 @@ alias man="tldr"
 alias c="clear"
 alias terraform="tofu"
 alias tf="tofu"
+alias lg="lazygit"
 
 
 # Custom config for work which I don't want to publish
