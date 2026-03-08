@@ -1,123 +1,161 @@
+# Uncomment to profile shell startup:
 # zmodload zsh/zprof
 
+# ============================================================
+# Environment
+# ============================================================
 
-source_if_exists () {
-    if test -r "$1"; then
-        source "$1"
-    fi
-}
-
-
-if [[ -f "/opt/homebrew/bin/brew" && $- == *l* ]]; then
+# Homebrew — sets HOMEBREW_PREFIX, HOMEBREW_CELLAR, PATH, MANPATH, etc.
+if [[ -f /opt/homebrew/bin/brew ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-# Set the directory we want to store antidote and plugins
-ZDOTDIR="${HOME}/.antidote"
+export GOPATH="${GOPATH:-$HOME/dev/go}"
+export PNPM_HOME="$HOME/Library/pnpm"
+export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+export GPG_TTY=$(tty)
 
-# Download antidote, if it's not there yet
-if [ ! -d "$ZDOTDIR" ]; then
-   git clone --depth=1 https://github.com/mattmc3/antidote.git ${ZDOTDIR}
-fi
+export PATH="$HOME/bin:$GOPATH/bin:$HOME/.composer/vendor/bin:$HOME/dotfiles/scripts:$PNPM_HOME:$PATH"
 
-# Initialize compinit before loading plugins (needed for compdef)
+# ============================================================
+# History
+# ============================================================
+
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+
+setopt HIST_IGNORE_DUPS   # don't record a command that is a duplicate of the previous
+setopt HIST_IGNORE_SPACE  # don't record commands starting with a space
+setopt SHARE_HISTORY      # share history between all sessions
+
+# ============================================================
+# Completions
+# ============================================================
+
+# Add homebrew installed zsh-completions to fpath before compinit
+fpath=("$HOMEBREW_PREFIX/share/zsh-completions" $fpath)
+
 autoload -Uz compinit
 zcompdump="$HOME/.zcompdump"
-# Only recompile if needed
-if [[ ! -s ${zcompdump}.zwc || ${zcompdump} -nt ${zcompdump}.zwc ]]; then
-  compinit -d "${zcompdump}"
-  zcompile "${zcompdump}"
+# Full compinit (with compaudit) when dump is missing or older than 24h; fast -C otherwise.
+# (Nmh-24): N=nullglob, m=mtime, h=hours, less than 24h old
+_comp_files=("${zcompdump}"(Nmh-24))
+if (( $#_comp_files )); then
+  compinit -C -d "$zcompdump"
 else
-  compinit -C -d "${zcompdump}"
+  compinit -d "$zcompdump"
+  zcompile -R "$zcompdump" 2>/dev/null
 fi
+unset _comp_files
 
-# Set the root name of the plugins files (.txt and .zsh) antidote will use.
-zsh_plugins=$HOME/.config/antidote/.zsh_plugins
+# case-insensitive completion: typing foo also matches Foo, FOO, etc.
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+# colors completion candidates using the same colors as ls (directories blue, executables green, etc.)
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+# disables zsh's built-in arrow-key completion menu. This is required for fzf-tab to take over and show completions in an fzf popup instead.
+zstyle ':completion:*' menu no
+# when completing cd or a zoxide path (__zoxide_z), shows a file listing preview in the fzf popup for the highlighted directory.
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -1 --color=always $realpath'
 
-# Ensure the .zsh_plugins.txt file exists so you can add plugins.
-[[ -f ${zsh_plugins}.txt ]] || touch ${zsh_plugins}.txt
+# ============================================================
+# Plugins
+# ============================================================
 
-# Lazy-load antidote from its functions directory.
-fpath=(${ZDOTDIR}/functions $fpath)
-autoload -Uz antidote
+# $HOMEBREW_PREFIX is set by `brew shellenv` above
+source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+source "$HOMEBREW_PREFIX/share/fzf-tab/fzf-tab.zsh"
 
-# Generate a new static file whenever .zsh_plugins.txt is updated.
-if [[ ! ${zsh_plugins}.zsh -nt ${zsh_plugins}.txt ]]; then
-  antidote bundle <${zsh_plugins}.txt >|${zsh_plugins}.zsh
-fi
+# ============================================================
+# Key bindings
+# ============================================================
 
-# Source your static plugins file.
-source ${zsh_plugins}.zsh
-
-# Keybindings
 bindkey -e
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 bindkey '^[w' kill-region
 
-# Shell integrations
-export STARSHIP_CONFIG=~/.config/starship/starship.toml
-alias fuck='if ! declare -f fuck &>/dev/null; then eval -- "$(thefuck -a)"; fi && fuck'
+# ============================================================
+# Tool integrations
+# ============================================================
 
 eval "$(starship init zsh)"
-zsh-defer eval "$(fzf --zsh)"
-zsh-defer eval "$(zoxide init zsh --cmd cd)"
-zsh-defer eval "$(atuin init zsh)"
+# disable ctrl-r default binding, because atuin will take over and show history search in an fzf popup instead.
+FZF_CTRL_R_COMMAND= source <(fzf --zsh)
+eval "$(zoxide init zsh --cmd cd)"
+eval "$(atuin init zsh)"
 
-# Completion styling
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' menu no
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
-
-export GOPATH="${GOPATH:-$HOME/dev/go}"
-export PATH="$HOME/bin:/usr/local/bin:$GOPATH/bin:$HOME/.composer/vendor/bin/:$HOME/dotfiles/scripts:$PATH"
-
-
-# git clean up merged branches
-gcmb() {
-  git fetch --prune origin
-
-  git branch --merged | egrep -v "(^\*|main|master|develop)" | xargs git branch --delete
-}
-
-gif() {
-    # Based on https://gist.github.com/SheldonWangRJT/8d3f44a35c8d1386a396b9b49b43c385
-    output_file="$1.gif"
-    ffmpeg -y -i $1 -v quiet -pix_fmt rgb8 -r 10 $output_file && gifsicle -O3 $output_file -o $output_file
-}
+# ============================================================
+# Aliases
+# ============================================================
 
 alias reload="source ~/.zshrc"
-alias f="fuck"
 alias cat="bat"
 alias catp="bat --style=plain"
 alias ls="eza"
 alias la="eza --long --all --group"
-alias man="tldr"
 alias c="clear"
 alias terraform="tofu"
 alias tf="tofu"
 alias lg="lazygit"
+alias fuck='if ! declare -f fuck &>/dev/null; then eval -- "$(thefuck -a)"; fi && fuck'
+alias f="fuck"
 
+# changing dir
+alias -g ...='../..'
+alias -g ....='../../..'
+alias -g .....='../../../..'
+alias -g ......='../../../../..'
+# listing dir
+alias l='ls -lah'
+alias ll='ls -lh'
 
-# Custom config for work which I don't want to publish
+# git
+alias gst='git status'
+alias gsw='git switch'
+alias gco='git checkout'
+alias ga='git add'
+alias gaa='git add --all'
+alias gl='git pull'
+alias gp='git push'
+alias gpf='git push --force-with-lease'
+
+# ============================================================
+# Functions
+# ============================================================
+
+source_if_exists() {
+  [[ -r $1 ]] && source "$1"
+}
+
+# use tldr and if it failes, use man as fallback
+man() { 
+  tldr "$@" 2>/dev/null || command man "$@"; 
+}
+
+# Delete local branches already merged into main/master/develop
+gcmb() {
+  git fetch --prune origin
+  git branch --merged | grep -Ev '^\*|main|master|develop' | xargs git branch --delete
+}
+
+# opens an interactive directory picker with fzf
+z() {
+  if [[ $# -eq 0 ]]; then
+    cd "$(zoxide query -ls | fzf --preview 'eza -1 {}' --height 40% | awk '{print $2}')"
+  else
+    zoxide query "$@" | read dir && cd "$dir"
+  fi
+}
+
+# ============================================================
+# Local overrides
+# ============================================================
+
 source_if_exists ~/.config/zsh/private.zsh
 source_if_exists ~/.config/zsh/work.zsh
 
-
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
-# fpath=(/Users/marvincaspar/.docker/completions $fpath)
-# autoload -Uz compinit
-# compinit
-# End of Docker CLI completions
-
+# Uncomment to print profiler output:
 # zprof
-
-# pnpm
-export PNPM_HOME="/Users/marvincaspar/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
