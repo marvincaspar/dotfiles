@@ -29,18 +29,11 @@
     }
   },
   {
-    "context": "(Workspace && debugger_running)",
-    "bindings": {
-      "f7": "debugger::StepInto"
-    }
-  },
-  {
     "bindings": {
       "shift-f8": "debugger::StepOut"
     }
   },
   {
-    "context": "(Workspace && debugger_stopped)",
     "bindings": {
       "f9": "debugger::Continue"
     }
@@ -48,6 +41,35 @@
   {
     "bindings": {
       "shift-f9": "debugger::Stop"
+    }
+  },
+  {
+    "bindings": {
+      "f7": "debugger::StepInto"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "cmd-f8": "editor::ToggleBreakpoint"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "f9": null
+    }
+  },
+  {
+    "context": "(Editor && edit_prediction)",
+    "bindings": {
+      "ctrl-alt-tab": "editor::AcceptEditPrediction"
+    }
+  },
+  {
+    "context": "(Editor && edit_prediction_conflict)",
+    "bindings": {
+      "ctrl-alt-tab": "editor::AcceptEditPrediction"
     }
   }
 ]

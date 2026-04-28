@@ -7,26 +7,41 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "git_panel": {
+    "dock": "left"
+  },
+  "disable_ai": false,
+  "edit_predictions": {
+    "provider": "copilot"
+  },
+  "format_on_save": "off",
   "project_panel": {
+    "dock": "left",
     "auto_fold_dirs": false,
     "default_width": 350.0,
   },
   "session": {
     "trust_all_worktrees": true,
   },
-  "features": {
-    "edit_prediction_provider": "copilot",
-  },
   "telemetry": {
     "diagnostics": false,
     "metrics": false,
   },
   "agent": {
-    "default_profile": "ask",
-    "always_allow_tool_actions": true,
+    "dock": "right",
+    "default_profile": "write",
+    "always_allow_tool_actions": false,
     "default_model": {
+      "effort": "high",
+      "enable_thinking": true,
       "provider": "copilot_chat",
-      "model": "claude-sonnet-4.5",
+      "model": "claude-sonnet-4.6",
     },
     "model_parameters": [],
   },
