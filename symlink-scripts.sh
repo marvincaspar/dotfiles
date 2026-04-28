@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 # Define the directory containing your scripts
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scripts"
@@ -20,5 +21,8 @@ for script in "$SCRIPT_DIR"/*; do
         echo "Symlinked: $script -> $TARGET_DIR/$script_name"
     fi
 done
+
+# Manually symlink pi agent sandbox script to have agent sandbox config stored in one folder
+ln -sf "agent-sandbox/pi" "$TARGET_DIR/pi"
 
 echo "All scripts have been symlinked."

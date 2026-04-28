@@ -16,6 +16,8 @@ cd dotfiles
 make setup
 ```
 
+> **_NOTE:_** `.agents` dir is copied to your home directory and not symlinked, because the ai agent within a sandbox can't follow the symlink
+
 ## Color scheme
 
 I try to use the same color scheme as tools. Currently I prefer [catppuccin/mocha](https://github.com/catppuccin/).

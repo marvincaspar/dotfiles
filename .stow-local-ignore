@@ -4,8 +4,12 @@
 \.vscode
 README\.md
 Makefile
+\.agents
+agent-sandbox
 brew
 corne\.vil
+corne2026\.vil
+install-agent-skills\.sh
 install-tools\.sh
 scripts
 symlink-scripts\.sh
