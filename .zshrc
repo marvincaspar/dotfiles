@@ -72,6 +72,9 @@ source "$HOMEBREW_PREFIX/share/fzf-tab/fzf-tab.zsh"
 # Key bindings
 # ============================================================
 
+# Configure word boundaries for Alt+Backspace
+WORDCHARS=''
+
 bindkey -e
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
@@ -104,10 +107,14 @@ alias fuck='if ! declare -f fuck &>/dev/null; then eval -- "$(thefuck -a)"; fi &
 alias f="fuck"
 
 # changing dir
+setopt auto_cd
+
 alias -g ...='../..'
 alias -g ....='../../..'
 alias -g .....='../../../..'
 alias -g ......='../../../../..'
+alias -- -='cd -'
+
 # listing dir
 alias l='ls -lah'
 alias ll='ls -lh'
@@ -122,6 +129,10 @@ alias gl='git pull'
 alias gp='git push'
 alias gpf='git push --force-with-lease'
 
+# magento
+alias mci='cd magento && composer install && cd ..'
+alias mcu='cd magento && composer update && cd ..'
+
 # ============================================================
 # Functions
 # ============================================================
@@ -131,15 +142,24 @@ source_if_exists() {
 }
 
 # use tldr and if it failes, use man as fallback
-man() { 
-  tldr "$@" 2>/dev/null || command man "$@"; 
+man() {
+  tldr "$@" 2>/dev/null || command man "$@";
 }
 
 # Delete local branches already merged into main/master/develop
-gcmb() {
+git-clean-merged() {
   git fetch --prune origin
   git branch --merged | grep -Ev '^\*|main|master|develop' | xargs git branch --delete
 }
+alias gmclean='git-clean-merged'
+
+# Update git and clean merged branches
+git-sync-clean() {
+    git switch $(git remote show origin | grep "HEAD branch" | sed 's/.*: //')
+    git pull
+    git-clean-merged
+}
+alias gsync='git-sync-clean'
 
 # opens an interactive directory picker with fzf
 z() {
