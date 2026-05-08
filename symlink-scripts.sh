@@ -22,7 +22,4 @@ for script in "$SCRIPT_DIR"/*; do
     fi
 done
 
-# Manually symlink pi agent sandbox script to have agent sandbox config stored in one folder
-ln -sf "agent-sandbox/pi" "$TARGET_DIR/pi"
-
 echo "All scripts have been symlinked."
