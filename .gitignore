@@ -1,4 +1,6 @@
 .vscode
+.config/zsh/plugins
+.config/zsh/.zcompcache
 .config/zsh/private.zsh
 .config/zsh/work.zsh
 .config/antidote/.zsh_plugins.zsh
