@@ -21,3 +21,18 @@ make setup
 ## Color scheme
 
 I try to use the same color scheme as tools. Currently I prefer [catppuccin/mocha](https://github.com/catppuccin/).
+
+## Point zsh at the config directory
+
+Add the following to ~/.zshenv:
+
+```sh
+export ZDOTDIR="$HOME/.config/zsh"
+```
+
+## Create required directories
+
+```sh
+mkdir -p ~/.local/state/zsh   # history
+mkdir -p ~/.cache/zsh          # completion cache
+```
