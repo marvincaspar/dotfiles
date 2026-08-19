@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# git-nuke — discard absolutely all local changes and return the repository to the exact state of the latest commit
+#
+# Usage:
+#   git-nuke
+set -euo pipefail
+
+git reset HEAD --hard # revert any uncommitted changes
+git clean -df # remove untracked files AND directories

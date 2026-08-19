@@ -5,6 +5,7 @@
 README\.md
 Makefile
 \.agents
+\.local
 agent-sandbox
 brew
 corne\.vil
