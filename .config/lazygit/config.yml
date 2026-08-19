@@ -1,0 +1,13 @@
+customCommands:
+  - key: '<a+u>'
+    context: global
+    command: 'git-update'
+    description: 'pull latest, prune stale branches, and clean up the repo'
+  - key: '<a+n>'
+    context: global
+    command: 'git-nuke'
+    description: 'discard absolutely all local changes'
+  - key: '<a+p>'
+    context: global
+    command: 'azdo-pr'
+    description: 'create azure devops pull request from current branch'
