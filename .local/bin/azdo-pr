@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+# azdo-pr — create or open Azure DevOps pull request
+#
+# Usage:
+#   azdo-pr [title]
 set -euo pipefail
-
-remote_name="${AZURE_PR_REMOTE:-origin}"
 
 fail() {
   echo "Error: $*" >&2
@@ -61,70 +63,75 @@ find_target_branch() {
   fail "could not find main or master"
 }
 
-command -v git >/dev/null 2>&1 || fail "git is required"
-command -v az >/dev/null 2>&1 || fail "Azure CLI is required"
+main() {
+  remote_name="${AZURE_PR_REMOTE:-origin}"
+  command -v git >/dev/null 2>&1 || fail "git is required"
+  command -v az >/dev/null 2>&1 || fail "Azure CLI is required"
 
-current_branch="$(git branch --show-current)"
-[[ -n "$current_branch" ]] || fail "not on a branch"
+  current_branch="$(git branch --show-current)"
+  [[ -n "$current_branch" ]] || fail "not on a branch"
 
-if [[ "$current_branch" == "main" || "$current_branch" == "master" ]]; then
-  echo "Nothing to do on $current_branch"
-  exit 0
-fi
+  if [[ "$current_branch" == "main" || "$current_branch" == "master" ]]; then
+    echo "Nothing to do on $current_branch"
+    exit 0
+  fi
 
-remote_url="$(git remote get-url "$remote_name" 2>/dev/null)" || fail "could not read remote '$remote_name'"
-organization=""
-project=""
-repository=""
-parse_remote "$remote_url"
-project="$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$project")"
-repository="$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$repository")"
+  remote_url="$(git remote get-url "$remote_name" 2>/dev/null)" || fail "could not read remote '$remote_name'"
+  organization=""
+  project=""
+  repository=""
+  parse_remote "$remote_url"
+  project="$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$project")"
+  repository="$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$repository")"
 
-organization_url="https://dev.azure.com/${organization}"
-target_branch="$(find_target_branch)"
-source_ref="refs/heads/${current_branch}"
-target_ref="refs/heads/${target_branch}"
+  organization_url="https://dev.azure.com/${organization}"
+  target_branch="$(find_target_branch)"
+  source_ref="refs/heads/${current_branch}"
+  target_ref="refs/heads/${target_branch}"
 
-title="${*:-$(git log -1 --pretty=%s)}"
+  title="${*:-$(git log -1 --pretty=%s)}"
 
-if ! git ls-remote --exit-code --heads "$remote_name" "$current_branch" >/dev/null 2>&1; then
-  echo "Pushing ${current_branch} to ${remote_name}..."
-  git push -u "$remote_name" "$current_branch"
-fi
+  if ! git ls-remote --exit-code --heads "$remote_name" "$current_branch" >/dev/null 2>&1; then
+    echo "Pushing ${current_branch} to ${remote_name}..."
+    git push -u "$remote_name" "$current_branch"
+  fi
 
-existing_pr_id="$({
-  az repos pr list \
+  existing_pr_id="$({
+    az repos pr list \
+      --organization "$organization_url" \
+      --project "$project" \
+      --repository "$repository" \
+      --status active \
+      --source-branch "$source_ref" \
+      --query '[0].pullRequestId' \
+      --output tsv
+  } 2>/dev/null || true)"
+
+  if [[ -n "$existing_pr_id" && "$existing_pr_id" != "null" ]]; then
+    repo_web_url="$(az repos show --organization "$organization_url" --project "$project" --repository "$repository" --query webUrl --output tsv)"
+    pr_url="${repo_web_url}/pullrequest/${existing_pr_id}"
+    echo "PR already exists: ${pr_url}"
+    open_url "$pr_url"
+    exit 0
+  fi
+
+  echo "Creating PR for ${current_branch} -> ${target_branch}..."
+  pr_id="$(az repos pr create \
     --organization "$organization_url" \
     --project "$project" \
     --repository "$repository" \
-    --status active \
     --source-branch "$source_ref" \
-    --query '[0].pullRequestId' \
-    --output tsv
-} 2>/dev/null || true)"
+    --target-branch "$target_ref" \
+    --title "$title" \
+    --query pullRequestId \
+    --delete-source-branch \
+    --output tsv)"
 
-if [[ -n "$existing_pr_id" && "$existing_pr_id" != "null" ]]; then
   repo_web_url="$(az repos show --organization "$organization_url" --project "$project" --repository "$repository" --query webUrl --output tsv)"
-  pr_url="${repo_web_url}/pullrequest/${existing_pr_id}"
-  echo "PR already exists: ${pr_url}"
+  pr_url="${repo_web_url}/pullrequest/${pr_id}"
+
+  echo "Created PR: ${pr_url}"
   open_url "$pr_url"
-  exit 0
-fi
+}
 
-echo "Creating PR for ${current_branch} -> ${target_branch}..."
-pr_id="$(az repos pr create \
-  --organization "$organization_url" \
-  --project "$project" \
-  --repository "$repository" \
-  --source-branch "$source_ref" \
-  --target-branch "$target_ref" \
-  --title "$title" \
-  --query pullRequestId \
-  --delete-source-branch \
-  --output tsv)"
-
-repo_web_url="$(az repos show --organization "$organization_url" --project "$project" --repository "$repository" --query webUrl --output tsv)"
-pr_url="${repo_web_url}/pullrequest/${pr_id}"
-
-echo "Created PR: ${pr_url}"
-open_url "$pr_url"
+main "$@"

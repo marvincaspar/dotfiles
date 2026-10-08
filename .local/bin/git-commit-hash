@@ -5,9 +5,13 @@
 #   git-commit-hash
 set -euo pipefail
 
-command -v git >/dev/null 2>&1 || { echo "git-commit-hash: git is required" >&2; exit 1; }
-command -v pbcopy >/dev/null 2>&1 || { echo "git-commit-hash: pbcopy is required" >&2; exit 1; }
+main() {
+  command -v git >/dev/null 2>&1 || { echo "git-commit-hash: git is required" >&2; exit 1; }
+  command -v pbcopy >/dev/null 2>&1 || { echo "git-commit-hash: pbcopy is required" >&2; exit 1; }
 
-hash="$(git rev-parse --verify HEAD)"
-printf '%s' "$hash" | pbcopy
-printf 'Copied %s\n' "$hash"
+  hash="$(git rev-parse --verify HEAD)"
+  printf '%s' "$hash" | pbcopy
+  printf 'Copied %s\n' "$hash"
+}
+
+main "$@"

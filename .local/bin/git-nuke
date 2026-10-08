@@ -5,5 +5,9 @@
 #   git-nuke
 set -euo pipefail
 
-git reset HEAD --hard # revert any uncommitted changes
-git clean -df # remove untracked files AND directories
+main() {
+  git reset HEAD --hard # revert any uncommitted changes
+  git clean -df # remove untracked files AND directories
+}
+
+main "$@"

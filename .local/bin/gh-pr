@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+# gh-pr — create or open GitHub pull request
+#
+# Usage:
+#   gh-pr [title]
 set -euo pipefail
-
-remote_name="${GITHUB_PR_REMOTE:-origin}"
 
 fail() {
   echo "Error: $*" >&2
@@ -34,39 +36,44 @@ find_target_branch() {
   fail "could not find main or master"
 }
 
-command -v git >/dev/null 2>&1 || fail "git is required"
-command -v gh >/dev/null 2>&1 || fail "GitHub CLI (gh) is required"
+main() {
+  remote_name="${GITHUB_PR_REMOTE:-origin}"
+  command -v git >/dev/null 2>&1 || fail "git is required"
+  command -v gh >/dev/null 2>&1 || fail "GitHub CLI (gh) is required"
 
-current_branch="$(git branch --show-current)"
-[[ -n "$current_branch" ]] || fail "not on a branch"
+  current_branch="$(git branch --show-current)"
+  [[ -n "$current_branch" ]] || fail "not on a branch"
 
-if [[ "$current_branch" == "main" || "$current_branch" == "master" ]]; then
-  echo "Nothing to do on $current_branch"
-  exit 0
-fi
+  if [[ "$current_branch" == "main" || "$current_branch" == "master" ]]; then
+    echo "Nothing to do on $current_branch"
+    exit 0
+  fi
 
-target_branch="$(find_target_branch)"
-title="${*:-$(git log -1 --pretty=%s)}"
+  target_branch="$(find_target_branch)"
+  title="${*:-$(git log -1 --pretty=%s)}"
 
-if ! git ls-remote --exit-code --heads "$remote_name" "$current_branch" >/dev/null 2>&1; then
-  echo "Pushing ${current_branch} to ${remote_name}..."
-  git push -u "$remote_name" "$current_branch"
-fi
+  if ! git ls-remote --exit-code --heads "$remote_name" "$current_branch" >/dev/null 2>&1; then
+    echo "Pushing ${current_branch} to ${remote_name}..."
+    git push -u "$remote_name" "$current_branch"
+  fi
 
-existing_pr_url="$(gh pr view "$current_branch" --json url --jq '.url' 2>/dev/null || true)"
+  existing_pr_url="$(gh pr view "$current_branch" --json url --jq '.url' 2>/dev/null || true)"
 
-if [[ -n "$existing_pr_url" ]]; then
-  echo "PR already exists: ${existing_pr_url}"
-  open_url "$existing_pr_url"
-  exit 0
-fi
+  if [[ -n "$existing_pr_url" ]]; then
+    echo "PR already exists: ${existing_pr_url}"
+    open_url "$existing_pr_url"
+    exit 0
+  fi
 
-echo "Creating PR for ${current_branch} -> ${target_branch}..."
-pr_url="$(gh pr create \
-  --base "$target_branch" \
-  --head "$current_branch" \
-  --title "$title" \
-  --body "")"
+  echo "Creating PR for ${current_branch} -> ${target_branch}..."
+  pr_url="$(gh pr create \
+    --base "$target_branch" \
+    --head "$current_branch" \
+    --title "$title" \
+    --body "")"
 
-echo "Created PR: ${pr_url}"
-open_url "$pr_url"
+  echo "Created PR: ${pr_url}"
+  open_url "$pr_url"
+}
+
+main "$@"

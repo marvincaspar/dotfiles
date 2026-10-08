@@ -35,121 +35,125 @@ usage() {
   exit 0
 }
 
-# ── argument parsing ──────────────────────────────────────────────────────────
-BASE_BRANCH=""
-REMOTE="origin"
+main() {
+  # ── argument parsing ──────────────────────────────────────────────────────────
+  BASE_BRANCH=""
+  REMOTE="origin"
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    -b|--base)    BASE_BRANCH="${2:-}"; shift 2 ;;
-    -r|--remote)  REMOTE="${2:-}";      shift 2 ;;
-    -h|--help)    usage ;;
-    *) fail "Unknown option: $1. Use -h for help." ;;
-  esac
-done
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -b|--base)    BASE_BRANCH="${2:-}"; shift 2 ;;
+      -r|--remote)  REMOTE="${2:-}";      shift 2 ;;
+      -h|--help)    usage ;;
+      *) fail "Unknown option: $1. Use -h for help." ;;
+    esac
+  done
 
-# ── sanity checks ─────────────────────────────────────────────────────────────
-command -v git >/dev/null 2>&1 || fail "git is not installed"
+  # ── sanity checks ─────────────────────────────────────────────────────────────
+  command -v git >/dev/null 2>&1 || fail "git is not installed"
 
-git rev-parse --git-dir >/dev/null 2>&1 || fail "Not inside a git repository"
+  git rev-parse --git-dir >/dev/null 2>&1 || fail "Not inside a git repository"
 
-# ── detect base branch ────────────────────────────────────────────────────────
-if [[ -z "$BASE_BRANCH" ]]; then
-  if git show-ref --verify --quiet "refs/remotes/${REMOTE}/main" 2>/dev/null \
-     || git show-ref --verify --quiet "refs/heads/main" 2>/dev/null; then
-    BASE_BRANCH="main"
-  elif git show-ref --verify --quiet "refs/remotes/${REMOTE}/master" 2>/dev/null \
-     || git show-ref --verify --quiet "refs/heads/master" 2>/dev/null; then
-    BASE_BRANCH="master"
-  else
-    fail "Could not detect base branch. Use -b <branch> to specify one."
+  # ── detect base branch ────────────────────────────────────────────────────────
+  if [[ -z "$BASE_BRANCH" ]]; then
+    if git show-ref --verify --quiet "refs/remotes/${REMOTE}/main" 2>/dev/null \
+       || git show-ref --verify --quiet "refs/heads/main" 2>/dev/null; then
+      BASE_BRANCH="main"
+    elif git show-ref --verify --quiet "refs/remotes/${REMOTE}/master" 2>/dev/null \
+       || git show-ref --verify --quiet "refs/heads/master" 2>/dev/null; then
+      BASE_BRANCH="master"
+    else
+      fail "Could not detect base branch. Use -b <branch> to specify one."
+    fi
   fi
-fi
 
-CURRENT_BRANCH="$(git branch --show-current)"
+  CURRENT_BRANCH="$(git branch --show-current)"
 
-echo ""
-echo -e "${BOLD}git-update${RESET} · remote=${CYAN}${REMOTE}${RESET}  base=${CYAN}${BASE_BRANCH}${RESET}"
-echo ""
+  echo ""
+  echo -e "${BOLD}git-update${RESET} · remote=${CYAN}${REMOTE}${RESET}  base=${CYAN}${BASE_BRANCH}${RESET}"
+  echo ""
 
-# ── 1. fetch ──────────────────────────────────────────────────────────────────
-step "Fetching ${REMOTE} (with prune)…"
-# --prune removes remote-tracking branches that no longer exist on the remote
-if git fetch "${REMOTE}" --prune --tags 2>&1 | grep -v "^$"; then
-  ok "Fetch complete"
-else
-  ok "Already up to date"
-fi
-echo ""
-
-# ── 2. pull current branch ────────────────────────────────────────────────────
-step "Updating current branch (${CURRENT_BRANCH})…"
-if [[ "$CURRENT_BRANCH" == "$BASE_BRANCH" ]]; then
-  git pull "${REMOTE}" "${BASE_BRANCH}" --rebase
-  ok "Pulled ${BASE_BRANCH}"
-else
-  # Only pull if the current branch has an upstream tracking branch
-  if git rev-parse --abbrev-ref --symbolic-full-name "@{u}" >/dev/null 2>&1; then
-    git pull --rebase
-    ok "Pulled ${CURRENT_BRANCH}"
+  # ── 1. fetch ──────────────────────────────────────────────────────────────────
+  step "Fetching ${REMOTE} (with prune)…"
+  # --prune removes remote-tracking branches that no longer exist on the remote
+  if git fetch "${REMOTE}" --prune --tags 2>&1 | grep -v "^$"; then
+    ok "Fetch complete"
   else
-    warn "${CURRENT_BRANCH} has no upstream — skipping pull"
+    ok "Already up to date"
   fi
-fi
-echo ""
+  echo ""
 
-# ── 3. delete merged branches ─────────────────────────────────────────────────
-step "Deleting local branches already merged into ${BASE_BRANCH}…"
+  # ── 2. pull current branch ────────────────────────────────────────────────────
+  step "Updating current branch (${CURRENT_BRANCH})…"
+  if [[ "$CURRENT_BRANCH" == "$BASE_BRANCH" ]]; then
+    git pull "${REMOTE}" "${BASE_BRANCH}" --rebase
+    ok "Pulled ${BASE_BRANCH}"
+  else
+    # Only pull if the current branch has an upstream tracking branch
+    if git rev-parse --abbrev-ref --symbolic-full-name "@{u}" >/dev/null 2>&1; then
+      git pull --rebase
+      ok "Pulled ${CURRENT_BRANCH}"
+    else
+      warn "${CURRENT_BRANCH} has no upstream — skipping pull"
+    fi
+  fi
+  echo ""
 
-# List branches merged into base, excluding the base branch itself and HEAD
-merged_branches=$(
-  git branch --merged "${BASE_BRANCH}" \
-    | grep -v "^\*" \
-    | grep -v "^ *${BASE_BRANCH}$" \
-    | sed 's/^[[:space:]]*//' \
-    | grep -v "^$" \
-  || true
-)
+  # ── 3. delete merged branches ─────────────────────────────────────────────────
+  step "Deleting local branches already merged into ${BASE_BRANCH}…"
 
-if [[ -z "$merged_branches" ]]; then
-  ok "No merged branches to delete"
-else
-  while IFS= read -r branch; do
-    git branch -d "$branch"
-    ok "Deleted ${YELLOW}${branch}${RESET}"
-  done <<< "$merged_branches"
-fi
-echo ""
+  # List branches merged into base, excluding the base branch itself and HEAD
+  merged_branches=$(
+    git branch --merged "${BASE_BRANCH}" \
+      | grep -v "^\*" \
+      | grep -v "^ *${BASE_BRANCH}$" \
+      | sed 's/^[[:space:]]*//' \
+      | grep -v "^$" \
+    || true
+  )
 
-# ── 4. delete gone remote-tracking branches ───────────────────────────────────
-step "Deleting local branches whose remote is gone…"
+  if [[ -z "$merged_branches" ]]; then
+    ok "No merged branches to delete"
+  else
+    while IFS= read -r branch; do
+      git branch -d "$branch"
+      ok "Deleted ${YELLOW}${branch}${RESET}"
+    done <<< "$merged_branches"
+  fi
+  echo ""
 
-gone_branches=$(
-  git branch -vv \
-    | grep ": gone]" \
-    | grep -v "^\*" \
-    | awk '{print $1}' \
-  || true
-)
+  # ── 4. delete gone remote-tracking branches ───────────────────────────────────
+  step "Deleting local branches whose remote is gone…"
 
-if [[ -z "$gone_branches" ]]; then
-  ok "No orphaned tracking branches found"
-else
-  while IFS= read -r branch; do
-    git branch -D "$branch"
-    ok "Deleted ${YELLOW}${branch}${RESET} (remote gone)"
-  done <<< "$gone_branches"
-fi
-echo ""
+  gone_branches=$(
+    git branch -vv \
+      | grep ": gone]" \
+      | grep -v "^\*" \
+      | awk '{print $1}' \
+    || true
+  )
 
-# ── 5. git gc ─────────────────────────────────────────────────────────────────
-step "Running git gc (garbage collection)…"
-# --auto   — only run when git decides it's needed (based on loose object thresholds)
-# --quiet  — suppress verbose object counting output
-git gc --auto --quiet
-ok "Garbage collection complete"
-echo ""
+  if [[ -z "$gone_branches" ]]; then
+    ok "No orphaned tracking branches found"
+  else
+    while IFS= read -r branch; do
+      git branch -D "$branch"
+      ok "Deleted ${YELLOW}${branch}${RESET} (remote gone)"
+    done <<< "$gone_branches"
+  fi
+  echo ""
 
-# ── done ──────────────────────────────────────────────────────────────────────
-echo -e "${GREEN}${BOLD}All done!${RESET} Repository is clean and up to date."
-echo ""
+  # ── 5. git gc ─────────────────────────────────────────────────────────────────
+  step "Running git gc (garbage collection)…"
+  # --auto   — only run when git decides it's needed (based on loose object thresholds)
+  # --quiet  — suppress verbose object counting output
+  git gc --auto --quiet
+  ok "Garbage collection complete"
+  echo ""
+
+  # ── done ──────────────────────────────────────────────────────────────────────
+  echo -e "${GREEN}${BOLD}All done!${RESET} Repository is clean and up to date."
+  echo ""
+}
+
+main "$@"
